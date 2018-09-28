@@ -1,2 +1,2 @@
-export const apiUrl = 'http://weather-color.zackky.com'
-export const acceptHeader = 'application/prs.weathercolor.v1+json'
+export const apiUrl = 'https://weather-color.zackyjack.com'
+export const acceptHeader = 'application/x.weathercolor.v1+json'

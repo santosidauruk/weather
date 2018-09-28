@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import { Container, CurrentTimeContent, NextDayContent, NextDayWeather } from './style'
-import Skycons from 'react-skycons'
-
+import WeatherPage from './components/WeatherPage'
 import { apiUrl, acceptHeader } from './constant'
+import moment from 'moment'
 
 class App extends Component {
     state = {
@@ -16,6 +15,13 @@ class App extends Component {
         },
         isLoading: true,
         weatherData: {},
+        // wholeData: [
+        //     today: {
+        //         date: ,
+        //         data:
+        //     },
+        //     nextDay
+        // ]
     }
     componentDidMount() {
         this._getLocation()
@@ -31,9 +37,16 @@ class App extends Component {
                     latitude: positionResponse.coords.latitude,
                     longitude: positionResponse.coords.longitude,
                 }
-                console.log(positionResponse, 'pos response')
                 this.setState({ position })
-                this._getWeather(this.state.position)
+
+                // this._getWeather({
+                //     latitude: Number('38.907192'),
+                //     longitude: Number('-77.036873'),
+                // })
+                const dates = this._getDates()
+                console.log(dates, 'days')
+
+                this._getWeather(position, dates)
             }
 
             const error = (posErr) => {
@@ -46,56 +59,66 @@ class App extends Component {
         }
     }
 
-    _getWeather = ({ latitude, longitude }) => {
+    _getDates = () => {
+        let days = []
+        for (let i = 0; i <= 2; i++) {
+            const timestamp = moment()
+                .add(i, 'days')
+                .format('x')
+            days.push(Math.floor(timestamp / 1000))
+        }
+        return days
+    }
+
+    /**
+     * NOTE:
+     * date : []
+     * response [{}]
+     * date: []
+     */
+    _getWeather = ({ latitude, longitude }, dates) => {
         this.setState({ isLoading: true })
-        axios
-            .get(`${apiUrl}/api/weathers/?latitude=${latitude}&longitude=${longitude}`)
-            .then((response) => {
-                console.log(response, 'api res')
-                this.setState({
-                    weatherData: response.data,
-                    isLoading: false,
+        // let date = new Date()
+        // console.log(date.getDate() + 1, 'date')
+        // console.log(Math.floor(moment().valueOf() / 1000), 'moment')
+        // console.log(Math.floor(moment().format('x') / 1000))
+        // console.log(
+        //     moment().format('x') ===
+        //         moment()
+        //             .add(0, 'days')
+        //             .format('x'),
+        //     'moment date'
+        // )
+        // date = Math.floor(date / 1000)
+        // console.log(date, 'date floor')
+        dates.forEach((date, index) => {
+            axios
+                .get(
+                    `${apiUrl}/api/weathers/?latitude=${latitude}&longitude=${longitude}&timestamp=${date}&geocoding=1`,
+                    {
+                        headers: {
+                            'accept-header': acceptHeader,
+                        },
+                    }
+                )
+                .then((response) => {
+                    console.log(response.data, index, new Date(date * 1000), 'res')
+                    // this.setState({
+                    //     weatherData: response.data,
+                    //     isLoading: false,
+                    // })
                 })
-            })
-            .catch((e) => console.log(e))
+                .catch((e) => console.log(e))
+        })
     }
 
     render() {
-        // skycons.add('icon1', Skycons.PARTLY_CLOUDY_DAY)
-        // skycons.play()
-        // console.log(skycons.)
-        // const { temperature, summary, icon } = this.state.weatherData.weather
-        return (
-            <Container bgColor={'blue'}>
-                {this.state.isLoading ? (
-                    <div>loading</div>
-                ) : (
-                    <React.Fragment>
-                        <CurrentTimeContent>
-                            <h2>{this.state.weatherData.weather.summary}</h2>
-                            <p>Yogyakarta</p>
-                            <h1>28</h1>
-                        </CurrentTimeContent>
-                        <NextDayContent>
-                            Monday
-                            <NextDayWeather>14&deg;C</NextDayWeather>
-                        </NextDayContent>
-                        <NextDayContent>
-                            DEerajat&deg;C
-                            <canvas id="icon1" width="128" height="128" />
-                            <Skycons
-                                color="black"
-                                icon="PARTLY_CLOUDY_DAY"
-                                style={{
-                                    width: '148px',
-                                    height: '72px',
-                                }}
-                            />
-                        </NextDayContent>
-                    </React.Fragment>
-                )}
-            </Container>
-        )
+        // const hsv = {
+        //     hue: this.state.weatherData.color.hue,
+        //     saturation: 50,
+        //     value: 50,
+        // }
+        return <WeatherPage weatherData={this.state.weatherData} />
     }
 }
 
