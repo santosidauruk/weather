@@ -1,17 +1,19 @@
 import styled from 'styled-components'
 
 export const WrapperPage = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     background: ${(props) => props.bgColor || 'red'};
 `
 
 export const Container = styled.div`
     width: 94%;
     max-width: 1024px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     margin: 0 auto;
-    padding: 194px 0;
+    display: flex;
+    // padding: 194px 0;
 
     @media screen and (max-width: 767px) {
         flex-direction: column;

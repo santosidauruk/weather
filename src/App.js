@@ -14,7 +14,7 @@ class App extends Component {
             3: 'timeout',
         },
         isLoading: true,
-        weatherData: {},
+        weatherData: [],
         // wholeData: [
         //     today: {
         //         date: ,
@@ -76,40 +76,37 @@ class App extends Component {
      * response [{}]
      * date: []
      */
-    _getWeather = ({ latitude, longitude }, dates) => {
+    _getWeather = (position, dates) => {
         this.setState({ isLoading: true })
-        // let date = new Date()
-        // console.log(date.getDate() + 1, 'date')
-        // console.log(Math.floor(moment().valueOf() / 1000), 'moment')
-        // console.log(Math.floor(moment().format('x') / 1000))
-        // console.log(
-        //     moment().format('x') ===
-        //         moment()
-        //             .add(0, 'days')
-        //             .format('x'),
-        //     'moment date'
-        // )
-        // date = Math.floor(date / 1000)
-        // console.log(date, 'date floor')
+        let promises = []
         dates.forEach((date, index) => {
-            axios
-                .get(
-                    `${apiUrl}/api/weathers/?latitude=${latitude}&longitude=${longitude}&timestamp=${date}&geocoding=1`,
-                    {
-                        headers: {
-                            'accept-header': acceptHeader,
-                        },
-                    }
-                )
-                .then((response) => {
-                    console.log(response.data, index, new Date(date * 1000), 'res')
-                    // this.setState({
-                    //     weatherData: response.data,
-                    //     isLoading: false,
-                    // })
-                })
-                .catch((e) => console.log(e))
+            promises.push(this._fetchData(position, date, index))
         })
+        console.log(promises, 'prom')
+        Promise.all(promises).then((values) => {
+            console.log(values)
+            const weatherData = values.map((value) => value.data)
+            this.setState({ weatherData })
+        })
+    }
+
+    _fetchData({ latitude, longitude }, date, index) {
+        return axios.get(
+            `${apiUrl}/api/weathers/?latitude=${latitude}&longitude=${longitude}&timestamp=${date}&geocoding=1`,
+            {
+                headers: {
+                    'accept-header': acceptHeader,
+                },
+            }
+        )
+        // .then((response) => {
+        // console.log(response.data, index, new Date(date * 1000), 'res')
+        // this.setState({
+        //     weatherData: response.data,
+        //     isLoading: false,
+        // })
+        // })
+        // .catch((e) => console.log(e))
     }
 
     render() {
