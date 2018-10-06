@@ -13,15 +13,12 @@ export const Container = styled.div`
     max-width: 1024px;
     margin: 0 auto;
     display: flex;
-    // padding: 194px 0;
 
     @media screen and (max-width: 767px) {
         flex-direction: column;
         padding: 30px 0;
     }
 `
-
-export const Content = styled.div``
 
 export const CurrentTimeContent = styled.div`
     .today {
